@@ -23,7 +23,7 @@ export default function Layout() {
       show: user.role === 'admin' || user.role === 'project_lead' },
     { name: 'User Management', href: '/users', icon: UsersIcon, 
       show: user.role === 'admin' },
-    { name: 'Account Settings', href: '/account', icon: Cog6ToothIcon, show: true }
+    { name: 'Account Settings', href: '/account', icon: Settings, show: true }
   ];
 
   const handleLogout = async () => {
@@ -53,7 +53,7 @@ export default function Layout() {
               className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
               onClick={() => setSidebarOpen(false)}
             >
-              <XMarkIcon className="h-6 w-6 text-white" />
+              <X className="h-6 w-6 text-white" />
             </button>
           </div>
           
@@ -149,7 +149,7 @@ export default function Layout() {
                 className="p-1 text-gray-400 hover:text-gray-600"
                 title="Logout"
               >
-                <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                <ArrowRight className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -164,7 +164,7 @@ export default function Layout() {
             className="-ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
             onClick={() => setSidebarOpen(true)}
           >
-            <Bars3Icon className="h-6 w-6" />
+            <Tally3 className="h-6 w-6" />
           </button>
         </div>
 

@@ -259,7 +259,7 @@ export default function UserManagement() {
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <XMarkIcon className="h-5 w-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
