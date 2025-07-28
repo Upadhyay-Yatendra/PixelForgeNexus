@@ -1,0 +1,18 @@
+# Global ignores
+node_modules/
+dist/
+build/
+.env
+.vite/
+.cache/
+*.log
+
+# Client-specific
+client/node_modules/
+client/dist/
+client/.env
+
+# Server-specific
+server/node_modules/
+server/dist/
+server/.env
