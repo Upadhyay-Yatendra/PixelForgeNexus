@@ -3,34 +3,40 @@ import { useQuery } from 'react-query';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { projectAPI, userAPI } from '../services/api';
-import { 
-  PlusIcon, 
-  UsersIcon, 
-  FolderIcon, 
-  CalendarIcon,
+import {
+  Plus,
+  Users,
+  FolderIcon,
+  Calendar,
   CheckCircleIcon,
-  ClockIcon 
+  ClockIcon
 } from 'lucide-react';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  
+
   const { data: projects, isLoading: projectsLoading } = useQuery(
     'projects',
-    () => user.role === 'developer' ? projectAPI.getMyProjects() : projectAPI.getAllProjects(),
+    () => user.role === 'developer' ? projectAPI.getMyProjects() : projectAPI.getAllProjects(), //leads will only be able to see projects in which they are lead
     { select: (data) => data.data.projects }
   );
 
-  const { data: users, isLoading: usersLoading } = useQuery(
-    'users',
-    () => userAPI.getAllUsers(),
-    { 
-      enabled: user.role === 'admin',
-      select: (data) => data.data.users 
+  const {
+    data: users,
+    isLoading: usersLoading,
+  } = useQuery(
+    'recent-users',
+    () => userAPI.getRecentUsers(), // make this new API call
+    {
+      enabled: user?.role === 'admin',
+      select: (data) => data.data.users,
+      refetchOnWindowFocus: false,
     }
   );
+  
 
-  const canCreateProject = user.role === 'admin' || user.role === 'project_lead';
+
+  const canCreateProject = user.role === 'admin' ;
   const canManageUsers = user.role === 'admin';
 
   const getStatusColor = (status) => {
@@ -64,24 +70,24 @@ export default function Dashboard() {
             {user.role === 'developer' && 'Developer'}
           </p>
         </div>
-        
+
         <div className="flex space-x-3">
           {canCreateProject && (
             <Link
               to="/projects/create"
               className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
             >
-              <PlusIcon className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 mr-2" />
               New Project
             </Link>
           )}
-          
+
           {canManageUsers && (
             <Link
               to="/users"
               className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
             >
-              <UsersIcon className="h-4 w-4 mr-2" />
+              <Users className="h-4 w-4 mr-2" />
               Manage Users
             </Link>
           )}
@@ -134,7 +140,7 @@ export default function Dashboard() {
             {user.role === 'developer' ? 'My Projects' : 'All Projects'}
           </h2>
         </div>
-        
+
         <div className="divide-y divide-gray-200">
           {projectsLoading ? (
             <div className="p-6 text-center text-gray-500">Loading projects...</div>
@@ -158,23 +164,23 @@ export default function Dashboard() {
                         {project.status}
                       </span>
                     </div>
-                    
+
                     <p className="text-gray-600 mt-1 line-clamp-2">
                       {project.description}
                     </p>
-                    
+
                     <div className="flex items-center space-x-4 mt-3 text-sm text-gray-500">
                       <div className="flex items-center">
-                        <CalendarIcon className="h-4 w-4 mr-1" />
+                        <Calendar className="h-4 w-4 mr-1" />
                         Deadline: {formatDate(project.deadline)}
                       </div>
                       <div className="flex items-center">
-                        <UsersIcon className="h-4 w-4 mr-1" />
+                        <Users className="h-4 w-4 mr-1" />
                         {project.assignedDevelopers?.length || 0} developers
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Link
                       to={`/projects/${project._id}`}
@@ -196,7 +202,7 @@ export default function Dashboard() {
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-medium text-gray-900">Recent Users</h2>
           </div>
-          
+
           <div className="divide-y divide-gray-200">
             {usersLoading ? (
               <div className="p-6 text-center text-gray-500">Loading users...</div>
@@ -207,11 +213,10 @@ export default function Dashboard() {
                     <p className="font-medium text-gray-900">{user.username}</p>
                     <p className="text-sm text-gray-600">{user.email}</p>
                   </div>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    user.role === 'admin' ? 'bg-red-100 text-red-800' :
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.role === 'admin' ? 'bg-red-100 text-red-800' :
                     user.role === 'project_lead' ? 'bg-blue-100 text-blue-800' :
-                    'bg-green-100 text-green-800'
-                  }`}>
+                      'bg-green-100 text-green-800'
+                    }`}>
                     {user.role}
                   </span>
                 </div>

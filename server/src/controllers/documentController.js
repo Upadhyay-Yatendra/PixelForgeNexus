@@ -1,34 +1,43 @@
-import asyncHandler from 'express-async-handler';
-import multer from 'multer';
-import path from 'path';
-import crypto from 'crypto';
-import fs from 'fs';
-import Document from '../models/Document.js';
+import asyncHandler from "express-async-handler";
+import multer from "multer";
+import path from "path";
+import crypto from "crypto";
+import fs from "fs";
+import Document from "../models/Document.js";
+
+// Ensure the uploads directory exists
+const uploadPath = path.join(process.cwd(), "uploads");
+
+// Create the uploads directory if it doesn't exist
+if (!fs.existsSync(uploadPath)) {
+  fs.mkdirSync(uploadPath, { recursive: true });
+}
 
 /* ---------- Multer Storage ---------- */
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads'),
+  destination: (req, file, cb) => cb(null, uploadPath),
+
   filename: (req, file, cb) => {
     crypto.randomBytes(16, (err, buf) => {
       if (err) return cb(err);
       const ext = path.extname(file.originalname).toLowerCase();
-      cb(null, `${buf.toString('hex')}${ext}`);
+      cb(null, `${buf.toString("hex")}${ext}`);
     });
-  }
+  },
 });
 
 /* ---------- File Filter ---------- */
-const allowed = ['application/pdf', 'image/png', 'image/jpeg', 'text/plain'];
+const allowed = ["application/pdf", "image/png", "image/jpeg", "text/plain"];
 const fileFilter = (req, file, cb) =>
   allowed.includes(file.mimetype)
     ? cb(null, true)
-    : cb(new Error('Invalid file type'), false);
+    : cb(new Error("Invalid file type"), false);
 
 export const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }
-}).single('document');
+  limits: { fileSize: 5 * 1024 * 1024 },
+}).single("document");
 
 /* ---------- Upload Controller ---------- */
 export const uploadDocument = asyncHandler(async (req, res) => {
@@ -38,7 +47,7 @@ export const uploadDocument = asyncHandler(async (req, res) => {
     originalName: req.file.originalname,
     mimetype: req.file.mimetype,
     size: req.file.size,
-    uploadedBy: req.user._id
+    uploadedBy: req.user._id,
   });
   res.status(201).json({ document: doc });
 });
@@ -50,12 +59,13 @@ export const projectDocuments = asyncHandler(async (req, res) => {
 
 export const downloadDocument = asyncHandler(async (req, res) => {
   const doc = await Document.findById(req.params.id);
-  const filePath = path.join('uploads', doc.path);
+  const filePath = path.join(uploadPath, doc.path);
+
   res.download(filePath, doc.originalName);
 });
 
 export const deleteDocument = asyncHandler(async (req, res) => {
   const doc = await Document.findByIdAndDelete(req.params.id);
-  fs.unlinkSync(path.join('uploads', doc.path));
+  fs.unlinkSync(path.join(uploadPath, doc.path));
   res.status(204).send();
 });

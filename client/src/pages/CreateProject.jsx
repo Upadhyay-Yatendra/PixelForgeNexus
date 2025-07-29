@@ -1,28 +1,29 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery } from 'react-query';
-import { projectAPI, userAPI } from '../services/api';
-import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
-import { ArrowLeftIcon, CalendarIcon, UsersIcon } from 'lucide-react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useMutation, useQuery } from "react-query";
+import { projectAPI, userAPI } from "../services/api";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
+import { ArrowLeft, Calendar, Users } from "lucide-react";
 
 export default function CreateProject() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    deadline: '',
-    leadId: user.role === 'project_lead' ? user._id : ''
+    name: "",
+    description: "",
+    deadline: "",
+    lead: user.role === "project_lead" ? user._id : "",
   });
 
   // Fetch project leads for admin
   const { data: projectLeads } = useQuery(
-    'project-leads',
+    "project-leads",
     () => userAPI.getAllUsers(),
     {
-      enabled: user.role === 'admin',
-      select: (data) => data.data.users.filter(u => u.role === 'project_lead')
+      enabled: user.role === "admin",
+      select: (data) =>
+        data.data.users.filter((u) => u.role === "project_lead"),
     }
   );
 
@@ -31,33 +32,37 @@ export default function CreateProject() {
     (projectData) => projectAPI.createProject(projectData),
     {
       onSuccess: (response) => {
-        toast.success('Project created successfully');
+        toast.success("Project created successfully");
         navigate(`/projects/${response.data.project._id}`);
       },
       onError: (error) => {
-        toast.error(error.response?.data?.error || 'Failed to create project');
-      }
+        toast.error(error.response?.data?.error || "Failed to create project");
+      },
     }
   );
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
+    const payload = {
+      ...formData
+    };
+
     // Validate deadline is in the future
     const deadline = new Date(formData.deadline);
     if (deadline <= new Date()) {
-      toast.error('Deadline must be in the future');
+      toast.error("Deadline must be in the future");
       return;
     }
 
-    createMutation.mutate(formData);
+    createMutation.mutate(payload);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -65,7 +70,7 @@ export default function CreateProject() {
   const getMinDate = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    return tomorrow.toISOString().split('T')[0];
+    return tomorrow.toISOString().split("T")[0];
   };
 
   return (
@@ -73,10 +78,10 @@ export default function CreateProject() {
       {/* Header */}
       <div className="flex items-center space-x-4 mb-6">
         <button
-          onClick={() => navigate('/dashboard')}
+          onClick={() => navigate("/dashboard")}
           className="p-2 rounded-md hover:bg-gray-100"
         >
-          <ArrowLeftIcon className="h-5 w-5" />
+          <ArrowLeft className="h-5 w-5" />
         </button>
         <h1 className="text-3xl font-bold text-gray-900">Create New Project</h1>
       </div>
@@ -87,7 +92,10 @@ export default function CreateProject() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Project Name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Project Name *
               </label>
               <input
@@ -108,7 +116,10 @@ export default function CreateProject() {
 
             {/* Project Description */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Project Description *
               </label>
               <textarea
@@ -123,14 +134,18 @@ export default function CreateProject() {
                 maxLength="1000"
               />
               <p className="mt-1 text-sm text-gray-500">
-                Provide a detailed description of the project scope and objectives
+                Provide a detailed description of the project scope and
+                objectives
               </p>
             </div>
 
             {/* Project Deadline */}
             <div>
-              <label htmlFor="deadline" className="block text-sm font-medium text-gray-700">
-                <CalendarIcon className="h-4 w-4 inline mr-1" />
+              <label
+                htmlFor="deadline"
+                className="block text-sm font-medium text-gray-700"
+              >
+                <Calendar className="h-4 w-4 inline mr-1" />
                 Project Deadline *
               </label>
               <input
@@ -149,16 +164,19 @@ export default function CreateProject() {
             </div>
 
             {/* Project Lead Selection (Admin Only) */}
-            {user.role === 'admin' && (
+            {user.role === "admin" && (
               <div>
-                <label htmlFor="leadId" className="block text-sm font-medium text-gray-700">
-                  <UsersIcon className="h-4 w-4 inline mr-1" />
+                <label
+                  htmlFor="lead"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  <Users className="h-4 w-4 inline mr-1" />
                   Project Lead *
                 </label>
                 <select
-                  id="leadId"
-                  name="leadId"
-                  value={formData.leadId}
+                  id="lead"
+                  name="lead"
+                  value={formData.lead}
                   onChange={handleInputChange}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                   required
@@ -177,12 +195,24 @@ export default function CreateProject() {
             )}
 
             {/* Project Lead Info (Project Lead Role) */}
-            {user.role === 'project_lead' && (
+            {user.role === "project_lead" && (
               <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  <UsersIcon className="h-4 w-4 inline mr-1" />
+                <label
+                  htmlFor="lead"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  <Users className="h-4 w-4 inline mr-1" />
                   Project Lead
                 </label>
+
+                {/* Hidden input to actually submit lead */}
+                <input
+                  type="hidden"
+                  id="lead"
+                  name="lead"
+                  value={user._id}
+                />
+
                 <div className="mt-1 p-3 bg-gray-50 rounded-md">
                   <p className="text-sm text-gray-900">{user.username} (You)</p>
                   <p className="text-sm text-gray-500">{user.email}</p>
@@ -197,7 +227,7 @@ export default function CreateProject() {
             <div className="flex justify-end space-x-3 pt-6">
               <button
                 type="button"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate("/dashboard")}
                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 Cancel
@@ -207,7 +237,7 @@ export default function CreateProject() {
                 disabled={createMutation.isLoading}
                 className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
               >
-                {createMutation.isLoading ? 'Creating...' : 'Create Project'}
+                {createMutation.isLoading ? "Creating..." : "Create Project"}
               </button>
             </div>
           </form>
@@ -215,13 +245,21 @@ export default function CreateProject() {
 
         {/* Project Creation Guidelines */}
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-blue-800 mb-2">Project Creation Guidelines</h3>
+          <h3 className="text-sm font-medium text-blue-800 mb-2">
+            Project Creation Guidelines
+          </h3>
           <ul className="text-sm text-blue-700 space-y-1">
             <li>• Choose a unique and descriptive project name</li>
-            <li>• Provide comprehensive project description including scope and objectives</li>
+            <li>
+              • Provide comprehensive project description including scope and
+              objectives
+            </li>
             <li>• Set realistic deadlines considering project complexity</li>
             <li>• Projects can be assigned developers after creation</li>
-            <li>• Document uploads and team management available in project details</li>
+            <li>
+              • Document uploads and team management available in project
+              details
+            </li>
           </ul>
         </div>
       </div>

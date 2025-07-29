@@ -4,12 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import {
   HomeIcon,
   FolderIcon,
-  UsersIcon,
+  Users,
   Settings,
   ArrowRight,
   Tally3,
   X,
-  PlusIcon
+  Plus
 } from 'lucide-react';
 
 export default function Layout() {
@@ -19,9 +19,9 @@ export default function Layout() {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon, show: true },
-    { name: 'New Project', href: '/projects/create', icon: PlusIcon, 
+    { name: 'New Project', href: '/projects/create', icon: Plus, 
       show: user.role === 'admin' || user.role === 'project_lead' },
-    { name: 'User Management', href: '/users', icon: UsersIcon, 
+    { name: 'User Management', href: '/users', icon: Users, 
       show: user.role === 'admin' },
     { name: 'Account Settings', href: '/account', icon: Settings, show: true }
   ];

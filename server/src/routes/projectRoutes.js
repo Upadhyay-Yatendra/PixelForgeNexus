@@ -18,7 +18,7 @@ router.use(protect);
 
 router.get('/', authorize(['admin', 'project_lead']), getProjects);
 router.get('/my', authorize('developer'), myProjects);
-router.post('/', authorize(['admin', 'project_lead']), createProject);
+router.post('/', authorize(['admin']), createProject);
 
 router
   .route('/:id')
